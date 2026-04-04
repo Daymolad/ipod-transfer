@@ -1,6 +1,5 @@
 const fs = require('fs/promises');
 const path = require('path');
-const musicMetadata = require('music-metadata');
 
 // Utility to recursively find files with specific extensions
 async function findMediaFiles(dir, extensions) {
@@ -56,6 +55,8 @@ async function isIpod(volumePath) {
 // Parse metadata for found files
 async function parseMetadata(filePaths) {
     const files = [];
+    const musicMetadata = await import('music-metadata');
+    
     for (const file of filePaths) {
         try {
             const metadata = await musicMetadata.parseFile(file, { duration: true, skipCovers: true });

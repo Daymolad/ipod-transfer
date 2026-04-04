@@ -56,11 +56,11 @@ Once scanned, your media will populate on the right panel.
 - **Select Media:** Check the boxes next to individual items you want to keep, or click the **Select All** checkbox to grab the entire folder.
 
 ### Step 3: Extract!
-1. Set an extraction path on your local drive (e.g., `/Users/Daymo/Music/Extracted`).
+1. Set an extraction path on your local drive (e.g., `/Users/Username/Music/Extracted`).
 2. Hit **Start Transfer**.
 3. Watch the progress bar as your files orchestrate their way to safety. 
 
-Your extracted items will be automatically placed into folders based on their `Category / Artist / Title` so they are fully organized!
+Your extracted items will be automatically placed into folders based on their `Category / Artist / Title` so they are fully organised!
 
 ---
 *Created with Electron, Vite, React, and Node.*

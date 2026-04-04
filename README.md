@@ -18,12 +18,18 @@ A sleek, offline-first native desktop application for extracting all of your mus
 
 ### For General Users (Download & Run)
 You can directly download the fully compiled application for your operating system:
-1. Navigate to the **[Releases / Actions tab](../../actions)** of this repository.
-2. Under the most recent completed build, scroll down to the **Artifacts** section.
-3. Download the version for your computer:
-   * **Mac:** Download the `.dmg` and drag to your Applications folder.
-   * **Windows:** Download the `.exe` and run the installer.
+1. Navigate to the **[Releases](../../releases/latest)** of this repository.
+2. Download the attached version for your computer:
+   * **Mac:** Download the `.dmg` file, open it, and drag the app into your Applications folder.
+   * **Windows:** Download the `.exe` file and run it.
 
+> [!WARNING]
+> **Mac Users - "App is Damaged" Error:** 
+> Because this is an unsigned app downloaded from GitHub, macOS Gatekeeper may block it and tell you it is "damaged and should be moved to the bin". 
+> To fix this and tell macOS that you trust the app, open your **Terminal** and run the following command to clear the quarantine flag:
+> ```bash
+> xattr -cr "/Applications/iPod Transfer.app"
+> ```
 ### For Developers (Run Locally)
 
 If you'd like to tweak the UI or add your own extraction rules, it's very easy to run locally:

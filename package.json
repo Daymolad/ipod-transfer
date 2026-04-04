@@ -1,0 +1,43 @@
+{
+  "name": "ipod-transfer",
+  "version": "1.0.0",
+  "description": "iPod Transfer Tool",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "pack:mac": "npm run build:frontend && electron-builder --mac",
+    "pack:win": "npm run build:frontend && electron-builder --win",
+    "build:all": "npm run build:frontend && electron-builder --mac --win"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "music-metadata": "^11.12.3"
+  },
+  "devDependencies": {
+    "electron": "^29.1.5",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.daymolad.ipodtransfer",
+    "productName": "iPod Transfer",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "main.js",
+      "backend/**/*",
+      "frontend/dist/**/*",
+      "package.json"
+    ]
+  }
+}

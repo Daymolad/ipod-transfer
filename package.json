@@ -1,6 +1,6 @@
 {
   "name": "ipod-transfer",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "iPod Transfer Tool",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "build:frontend": "cd frontend && npm install && npm run build",
     "pack:mac": "npm run build:frontend && electron-builder --mac",
     "pack:win": "npm run build:frontend && electron-builder --win",
-    "build:all": "npm run build:frontend && electron-builder --mac --win"
+    "pack:linux": "npm run build:frontend && electron-builder --linux",
+    "build:all": "npm run build:frontend && electron-builder --mac --win --linux"
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -32,6 +33,9 @@
     },
     "win": {
       "target": "nsis"
+    },
+    "linux": {
+      "target": ["deb"]
     },
     "files": [
       "main.js",

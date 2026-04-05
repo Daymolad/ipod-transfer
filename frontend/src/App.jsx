@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { HardDrive, Music, Mic, Image as ImageIcon, FolderArchive, ArrowRight, CheckCircle2, Loader2, PlayCircle } from 'lucide-react';
+import { HardDrive, Music, Mic, Image as ImageIcon, FolderArchive, ArrowRight, CheckCircle2, Loader2, PlayCircle, Video } from 'lucide-react';
 import './index.css';
 
 const API_BASE = '/api';
@@ -57,7 +57,7 @@ function App() {
   const startTransfer = async () => {
     const filesToTransfer = media.filter(m => selectedFiles.has(m.path));
     if (filesToTransfer.length === 0 || !destPath) return;
-    
+
     setTransferring(true);
     setTransferComplete(false);
     setProgress(0);
@@ -128,7 +128,7 @@ function App() {
     const newPaths = new Set(selectedFiles);
     const filtered = getFilteredMedia();
     const allSelected = filtered.length > 0 && filtered.every(m => newPaths.has(m.path));
-    
+
     if (allSelected) {
       filtered.forEach(m => newPaths.delete(m.path));
     } else {
@@ -153,6 +153,7 @@ function App() {
       case 'podcast': return <PlayCircle size={18} />;
       case 'voice_recording': return <Mic size={18} />;
       case 'photo': return <ImageIcon size={18} />;
+      case 'video': return <Video size={18} />;
       default: return <FolderArchive size={18} />;
     }
   };
@@ -263,7 +264,7 @@ function App() {
             <h2 className="text-sm text-sec" style={{ marginBottom: '16px', fontWeight: 600 }}>DISCOVERED MEDIA</h2>
 
             <div className="tabs">
-              {['all', 'music', 'podcast', 'voice_recording'].map(c => (
+              {['all', 'music', 'podcast', 'voice_recording', 'photo', 'video'].map(c => (
                 <div
                   key={c}
                   className={`tab ${category === c ? 'active' : ''}`}
@@ -293,10 +294,10 @@ function App() {
               {filteredMedia.length > 0 && !scanning && (
                 <div style={{ padding: '0 8px 12px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                    <input 
-                      type="checkbox" 
-                      checked={isCategoryAllSelected} 
-                      onChange={toggleCategorySelection} 
+                    <input
+                      type="checkbox"
+                      checked={isCategoryAllSelected}
+                      onChange={toggleCategorySelection}
                       style={{ width: '16px', height: '16px', accentColor: 'var(--accent-color)' }}
                     />
                     <span className="text-sm font-medium">Select All {category === 'all' ? 'Found' : category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')}</span>
@@ -309,11 +310,11 @@ function App() {
                 <div className="media-list">
                   {filteredMedia.map((m, i) => (
                     <div key={i} className="media-item" onClick={() => toggleSelection(m.path)} style={{ cursor: 'pointer', transition: 'background-color 0.2s', backgroundColor: selectedFiles.has(m.path) ? 'rgba(255,255,255,0.05)' : '' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedFiles.has(m.path)} 
-                        onChange={() => {}} 
-                        style={{ marginRight: '16px', width: '16px', height: '16px', accentColor: 'var(--accent-color)', pointerEvents: 'none' }} 
+                      <input
+                        type="checkbox"
+                        checked={selectedFiles.has(m.path)}
+                        onChange={() => { }}
+                        style={{ marginRight: '16px', width: '16px', height: '16px', accentColor: 'var(--accent-color)', pointerEvents: 'none' }}
                       />
                       <div className="media-info" style={{ flex: 1 }}>
                         <div className="media-icon">

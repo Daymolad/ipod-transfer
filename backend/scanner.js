@@ -59,35 +59,59 @@ async function parseMetadata(filePaths) {
     
     for (const file of filePaths) {
         try {
-            const metadata = await musicMetadata.parseFile(file, { duration: true, skipCovers: true });
-
-            // Categorize based on metadata
+            const ext = path.extname(file).toLowerCase();
             let category = 'music';
-            if (metadata.common.genre && metadata.common.genre.some(g => g.toLowerCase().includes('podcast'))) {
-                category = 'podcast';
-            } else if (file.includes('Recordings') && file.endsWith('.wav')) {
-                category = 'voice_recording';
+            let duration = 0;
+            let title = path.basename(file);
+            let artist = 'Unknown Artist';
+            let album = 'Unknown Album';
+            
+            if (['.jpg', '.jpeg', '.png', '.bmp', '.gif'].includes(ext)) {
+                category = 'photo';
+            } else if (['.mp4', '.m4v', '.mov'].includes(ext)) {
+                category = 'video';
+            }
+            
+            if (category !== 'photo') {
+                const metadata = await musicMetadata.parseFile(file, { duration: true, skipCovers: true });
+                duration = metadata.format.duration || 0;
+                title = metadata.common.title || title;
+                artist = metadata.common.artist || artist;
+                album = metadata.common.album || album;
+                
+                if (metadata.common.genre && metadata.common.genre.some(g => g.toLowerCase().includes('podcast'))) {
+                    category = 'podcast';
+                } else if (file.includes('Recordings') && file.endsWith('.wav')) {
+                    category = 'voice_recording';
+                }
             }
 
             files.push({
                 path: file,
-                title: metadata.common.title || path.basename(file),
-                artist: metadata.common.artist || 'Unknown Artist',
-                album: metadata.common.album || 'Unknown Album',
-                duration: metadata.format.duration || 0,
+                title: title,
+                artist: artist,
+                album: album,
+                duration: duration,
                 category: category,
                 size: (await fs.stat(file)).size
             });
         } catch (e) {
             // failed to parse, add as generic
             const stat = await fs.stat(file).catch(() => ({ size: 0 }));
+            const ext = path.extname(file).toLowerCase();
+            let category = file.includes('Recordings') ? 'voice_recording' : 'unknown';
+            if (['.jpg', '.jpeg', '.png', '.bmp', '.gif'].includes(ext)) {
+                category = 'photo';
+            } else if (['.mp4', '.m4v', '.mov'].includes(ext)) {
+                category = 'video';
+            }
             files.push({
                 path: file,
                 title: path.basename(file),
                 artist: 'Unknown',
                 album: 'Unknown',
                 duration: 0,
-                category: file.includes('Recordings') ? 'voice_recording' : 'unknown',
+                category: category,
                 size: stat.size
             });
         }
@@ -100,8 +124,9 @@ async function scanIpod(basePath) {
     const ipodControl = path.join(basePath, 'iPod_Control');
     const musicDir = path.join(ipodControl, 'Music');
     const recordingsDir = path.join(basePath, 'Recordings'); // Voice Memos are often outside iPod_Control or inside it.
+    const photosDir = path.join(basePath, 'Photos');
 
-    const extensions = ['.mp3', '.m4a', '.m4b', '.wav', '.aiff', '.aac'];
+    const extensions = ['.mp3', '.m4a', '.m4b', '.wav', '.aiff', '.aac', '.mp4', '.m4v', '.mov', '.jpg', '.jpeg', '.png', '.bmp', '.gif'];
 
     let allMedia = [];
 
@@ -116,6 +141,12 @@ async function scanIpod(basePath) {
         const recordingFiles = await findMediaFiles(recordingsDir, extensions);
         allMedia = allMedia.concat(recordingFiles);
     } catch (e) { console.error('Error scanning recordings dir', e); }
+
+    // Scan Photos
+    try {
+        const photoFiles = await findMediaFiles(photosDir, extensions);
+        allMedia = allMedia.concat(photoFiles);
+    } catch (e) { console.error('Error scanning photos dir', e); }
 
     // Parse all metadata
     const parsedFiles = await parseMetadata(allMedia);

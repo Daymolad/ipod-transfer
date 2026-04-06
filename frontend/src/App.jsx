@@ -13,6 +13,7 @@ function App() {
   const [media, setMedia] = useState([]);
   const [category, setCategory] = useState('all');
   const [selectedFiles, setSelectedFiles] = useState(new Set());
+  const [scanProgress, setScanProgress] = useState({ current: 0, total: 0, file: '', etaStr: 'Calculating...' });
 
   // Transfer state
   const [transferring, setTransferring] = useState(false);
@@ -43,10 +44,50 @@ function App() {
   const handleScan = async () => {
     if (!selectedPath) return;
     setScanning(true);
+    setScanProgress({ current: 0, total: 0, file: '', etaStr: 'Calculating...' });
+    const start = Date.now();
+
     try {
-      const { data } = await axios.post(`${API_BASE}/scan`, { path: selectedPath });
-      setMedia(data);
-      setSelectedFiles(new Set()); // Reset selections on new scan
+      const response = await fetch(`${API_BASE}/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: selectedPath })
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.replace('data: ', '');
+            if (dataStr) {
+              const data = JSON.parse(dataStr);
+              if (data.type === 'progress') {
+                const elapsed = (Date.now() - start) / 1000;
+                let etaStr = 'Calculating...';
+                if (data.current > 5) {
+                    const rate = elapsed / data.current;
+                    const remaining = (data.total - data.current) * rate;
+                    etaStr = remaining > 60 ? `${Math.ceil(remaining / 60)} min` : `${Math.ceil(remaining)} sec`;
+                }
+                setScanProgress({ current: data.current, total: data.total, file: data.file, etaStr });
+              } else if (data.type === 'complete') {
+                setMedia(data.data);
+                setSelectedFiles(new Set());
+              } else if (data.type === 'error') {
+                console.error(data.error);
+              }
+            }
+          }
+        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -285,9 +326,24 @@ function App() {
               )}
 
               {scanning && (
-                <div className="flex-center text-sec" style={{ height: '100%', flexDirection: 'column', gap: '16px' }}>
+                <div className="flex-center text-sec" style={{ height: '100%', flexDirection: 'column', gap: '24px', padding: '0 32px' }}>
                   <Loader2 size={48} className="spinner" style={{ animation: 'spin 2s linear infinite' }} />
-                  <p>Deep scanning device sectors...</p>
+                  <div style={{ textAlign: 'center', width: '100%' }}>
+                    <p style={{ marginBottom: '8px', color: '#fff' }}>Deep scanning device sectors...</p>
+                    <p className="text-xs" style={{ minHeight: '16px' }}>{scanProgress.file || 'Initializing scanner'}</p>
+                  </div>
+                  
+                  {scanProgress.total > 0 && (
+                    <div className="progress-container" style={{ width: '100%', maxWidth: '400px' }}>
+                      <div className="flex-between text-xs text-sec">
+                        <span>ETA: {scanProgress.etaStr}</span>
+                        <span>{scanProgress.current} / {scanProgress.total}</span>
+                      </div>
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -36,11 +36,20 @@ app.post('/api/scan', async (req, res) => {
     const { path: ipodPath } = req.body;
     if (!ipodPath) return res.status(400).json({ error: "No path provided" });
 
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
     try {
-        const data = await scanIpod(ipodPath);
-        res.json(data);
+        const onProgress = (prog) => {
+            res.write(`data: ${JSON.stringify({ type: 'progress', ...prog })}\n\n`);
+        };
+        const data = await scanIpod(ipodPath, onProgress);
+        res.write(`data: ${JSON.stringify({ type: 'complete', data })}\n\n`);
+        res.end();
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.write(`data: ${JSON.stringify({ type: 'error', error: e.message })}\n\n`);
+        res.end();
     }
 });
 

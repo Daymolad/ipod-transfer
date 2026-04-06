@@ -53,9 +53,11 @@ async function isIpod(volumePath) {
 }
 
 // Parse metadata for found files
-async function parseMetadata(filePaths) {
+async function parseMetadata(filePaths, onProgress) {
     const files = [];
     const musicMetadata = await import('music-metadata');
+    const total = filePaths.length;
+    let count = 0;
     
     for (const file of filePaths) {
         try {
@@ -115,16 +117,22 @@ async function parseMetadata(filePaths) {
                 size: stat.size
             });
         }
+        
+        count++;
+        if (onProgress) {
+            onProgress({ current: count, total: total, file: path.basename(file) });
+        }
     }
     return files;
 }
 
 // Scan the iPod directories
-async function scanIpod(basePath) {
+async function scanIpod(basePath, onProgress) {
     const ipodControl = path.join(basePath, 'iPod_Control');
     const musicDir = path.join(ipodControl, 'Music');
     const recordingsDir = path.join(basePath, 'Recordings'); // Voice Memos are often outside iPod_Control or inside it.
     const photosDir = path.join(basePath, 'Photos');
+    const dcimDir = path.join(basePath, 'DCIM');
 
     const extensions = ['.mp3', '.m4a', '.m4b', '.wav', '.aiff', '.aac', '.mp4', '.m4v', '.mov', '.jpg', '.jpeg', '.png', '.bmp', '.gif'];
 
@@ -148,8 +156,14 @@ async function scanIpod(basePath) {
         allMedia = allMedia.concat(photoFiles);
     } catch (e) { console.error('Error scanning photos dir', e); }
 
+    // Scan DCIM
+    try {
+        const dcimFiles = await findMediaFiles(dcimDir, extensions);
+        allMedia = allMedia.concat(dcimFiles);
+    } catch (e) { console.error('Error scanning dcim dir', e); }
+
     // Parse all metadata
-    const parsedFiles = await parseMetadata(allMedia);
+    const parsedFiles = await parseMetadata(allMedia, onProgress);
     return parsedFiles;
 }
 

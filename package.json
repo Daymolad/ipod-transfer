@@ -1,6 +1,10 @@
 {
   "name": "ipod-transfer",
   "version": "1.0.3",
+  "author": {
+    "name": "Daymolad",
+    "email": "damoncammish@gmail.com"
+  },
   "description": "iPod Transfer Tool",
   "main": "main.js",
   "scripts": {

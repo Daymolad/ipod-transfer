@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { HardDrive, Music, Mic, Image as ImageIcon, FolderArchive, ArrowRight, CheckCircle2, Loader2, PlayCircle, Video } from 'lucide-react';
+import { HardDrive, Music, Mic, Image as ImageIcon, FolderArchive, ArrowRight, CheckCircle2, Loader2, PlayCircle, Video, Search } from 'lucide-react';
 import './index.css';
 
 const API_BASE = '/api';
@@ -15,7 +15,6 @@ function App() {
   const [selectedFiles, setSelectedFiles] = useState(new Set());
   const [scanProgress, setScanProgress] = useState({ current: 0, total: 0, file: '', etaStr: 'Calculating...' });
 
-  // Transfer state
   const [transferring, setTransferring] = useState(false);
   const [progress, setProgress] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
@@ -31,7 +30,6 @@ function App() {
       const { data } = await axios.get(`${API_BASE}/volumes`);
       setVolumes(data);
       if (data.length > 0) {
-        // Auto-select first iPod found
         const ipod = data.find(v => v.isIpod);
         if (ipod) setSelectedPath(ipod.path);
         else setSelectedPath(data[0].path);
@@ -105,13 +103,9 @@ function App() {
     setTotalFiles(filesToTransfer.length);
 
     try {
-      // For SSE we can use fetch/EventSource or just fallback to simple fetch and await
-      // Since it's a POST, fetch with streaming response is best
       const response = await fetch(`${API_BASE}/transfer`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ files: filesToTransfer, destination: destPath })
       });
 
@@ -190,12 +184,12 @@ function App() {
 
   const getCategoryIcon = (cat) => {
     switch (cat) {
-      case 'music': return <Music size={18} />;
-      case 'podcast': return <PlayCircle size={18} />;
-      case 'voice_recording': return <Mic size={18} />;
-      case 'photo': return <ImageIcon size={18} />;
-      case 'video': return <Video size={18} />;
-      default: return <FolderArchive size={18} />;
+      case 'music': return <Music size={20} />;
+      case 'podcast': return <PlayCircle size={20} />;
+      case 'voice_recording': return <Mic size={20} />;
+      case 'photo': return <ImageIcon size={20} />;
+      case 'video': return <Video size={20} />;
+      default: return <FolderArchive size={20} />;
     }
   };
 
@@ -205,190 +199,209 @@ function App() {
 
   return (
     <>
-      <header className="header">
-        <HardDrive size={28} className="text-sec" color="var(--accent-color)" />
-        <h1>iPod Extraction Toolkit</h1>
+      <header className="header-nav">
+        <div className="header-logo">
+          <HardDrive size={16} /> 
+          <span style={{fontWeight: 600}}>iPod Toolkit</span>
+        </div>
+        <div>Mac</div>
       </header>
 
-      <main className="container">
-        <div className="grid-2">
-          {/* Left Column: Configuration */}
-          <div className="glass-panel">
-            <h2 className="text-sm text-sec" style={{ marginBottom: '16px', fontWeight: 600 }}>DEVICE CONFIGURATION</h2>
+      <main className="section section-light" style={{ padding: '40px 24px', flex: 1 }}>
+        <div className="container-inner" style={{ maxWidth: '1200px' }}>
+          
+          <div className="grid-2">
+            {/* Left Column: Setup & Transfer Settings */}
+            <div className="apple-card" style={{ display: 'flex', flexDirection: 'column', gap: '48px', margin: 0 }}>
+              
+              <div>
+                <h1 className="section-heading mb-4">Toolkit.</h1>
+                <p className="body-text text-sec mb-8">Scan your device to recover its media.</p>
 
-            <div className="input-group">
-              <label>Select Device Volume</label>
-              <select
-                className="glass-input"
-                value={selectedPath}
-                onChange={(e) => setSelectedPath(e.target.value)}
-              >
-                <option value="">-- Select Volume --</option>
-                {volumes.map(v => (
-                  <option key={v.path} value={v.path}>
-                    {v.name} {v.isIpod ? '(iPod Detected)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="input-group">
-              <label>Custom Source Path (Optional)</label>
-              <input
-                type="text"
-                className="glass-input"
-                value={selectedPath}
-                onChange={(e) => setSelectedPath(e.target.value)}
-                placeholder="/Volumes/My iPod"
-              />
-            </div>
-
-            <button
-              className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }}
-              onClick={handleScan}
-              disabled={scanning || !selectedPath}
-            >
-              {scanning ? <><Loader2 className="spinner" size={18} /> Scanning iPod...</> : 'Scan Device'}
-            </button>
-
-            {media.length > 0 && (
-              <div style={{ marginTop: '32px' }}>
-                <h2 className="text-sm text-sec" style={{ marginBottom: '16px', fontWeight: 600 }}>TRANSFER SETTINGS</h2>
-                <div className="input-group">
-                  <label>Destination Path</label>
+                <div className="apple-input-group">
+                  <label>Select Device Volume</label>
+                  <select
+                    className="apple-select"
+                    value={selectedPath}
+                    onChange={(e) => setSelectedPath(e.target.value)}
+                  >
+                    <option value="">-- Choose Volume --</option>
+                    {volumes.map(v => (
+                      <option key={v.path} value={v.path}>
+                        {v.name} {v.isIpod ? '(iPod Detected)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="apple-input-group mb-8">
+                  <label>Custom Source Path (Optional)</label>
                   <input
                     type="text"
-                    className="glass-input"
-                    value={destPath}
-                    onChange={(e) => setDestPath(e.target.value)}
+                    className="apple-input"
+                    value={selectedPath}
+                    onChange={(e) => setSelectedPath(e.target.value)}
+                    placeholder="/Volumes/My iPod"
                   />
                 </div>
 
-                <div style={{ padding: '16px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '8px', margin: '16px 0' }}>
-                  <p className="text-sm">Ready to extract <strong>{selectedFiles.size}</strong> items ({formatBytes(summary)})</p>
-                </div>
-
                 <button
-                  className="btn btn-primary"
-                  style={{ width: '100%', justifyContent: 'center' }}
-                  onClick={startTransfer}
-                  disabled={transferring || selectedFiles.size === 0}
+                  className="btn-apple-primary"
+                  style={{ width: '100%', justifyContent: 'center', padding: '12px' }}
+                  onClick={handleScan}
+                  disabled={scanning || !selectedPath}
                 >
-                  {transferring ? 'Transferring...' : <><ArrowRight size={18} /> Start Transfer</>}
+                  {scanning ? <><Loader2 className="spinner" size={20} /> Deep Scanning...</> : 'Scan Device Sectors'}
                 </button>
 
-                {transferring && (
-                  <div className="progress-container">
-                    <div className="flex-between text-xs text-sec">
-                      <span>{currentFile || 'Initiating...'}</span>
-                      <span>{progress} / {totalFiles}</span>
+                {scanning && scanProgress.total > 0 && (
+                  <div className="apple-progress-container mt-4">
+                    <div className="flex-between caption text-sec">
+                      <span>ETA: {scanProgress.etaStr}</span>
+                      <span>{scanProgress.current} of {scanProgress.total}</span>
                     </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${(progress / totalFiles) * 100}%` }}></div>
+                    <div className="apple-progress-bar">
+                      <div className="apple-progress-fill" style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}></div>
                     </div>
-                  </div>
-                )}
-
-                {transferComplete && (
-                  <div className="progress-container flex-center" style={{ color: '#10b981', gap: '8px' }}>
-                    <CheckCircle2 size={18} />
-                    <span className="text-sm font-medium">Transfer Complete!</span>
+                    <div className="caption text-sec mt-2" style={{ textAlign: 'center', minHeight: '20px' }}>
+                      {scanProgress.file}
+                    </div>
                   </div>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* Right Column: Media Preview */}
-          <div className="glass-panel" style={{ height: 'calc(100vh - 180px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <h2 className="text-sm text-sec" style={{ marginBottom: '16px', fontWeight: 600 }}>DISCOVERED MEDIA</h2>
-
-            <div className="tabs">
-              {['all', 'music', 'podcast', 'voice_recording', 'photo', 'video'].map(c => (
-                <div
-                  key={c}
-                  className={`tab ${category === c ? 'active' : ''}`}
-                  onClick={() => setCategory(c)}
-                  style={{ textTransform: 'capitalize' }}
-                >
-                  {c.replace('_', ' ')}
-                </div>
-              ))}
-            </div>
-
-            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
-              {media.length === 0 && !scanning && (
-                <div className="flex-center text-sec" style={{ height: '100%', flexDirection: 'column', gap: '16px' }}>
-                  <FolderArchive size={48} opacity={0.5} />
-                  <p>No media discovered yet. Scan a device to begin.</p>
-                </div>
-              )}
-
-              {scanning && (
-                <div className="flex-center text-sec" style={{ height: '100%', flexDirection: 'column', gap: '24px', padding: '0 32px' }}>
-                  <Loader2 size={48} className="spinner" style={{ animation: 'spin 2s linear infinite' }} />
-                  <div style={{ textAlign: 'center', width: '100%' }}>
-                    <p style={{ marginBottom: '8px', color: '#fff' }}>Deep scanning device sectors...</p>
-                    <p className="text-xs" style={{ minHeight: '16px' }}>{scanProgress.file || 'Initializing scanner'}</p>
-                  </div>
+              {media.length > 0 && (
+                <div style={{ paddingTop: '40px', borderTop: '1px solid #d2d2d7' }}>
+                  <h2 className="tile-heading mb-8">Extract</h2>
                   
-                  {scanProgress.total > 0 && (
-                    <div className="progress-container" style={{ width: '100%', maxWidth: '400px' }}>
-                      <div className="flex-between text-xs text-sec">
-                        <span>ETA: {scanProgress.etaStr}</span>
-                        <span>{scanProgress.current} / {scanProgress.total}</span>
-                      </div>
-                      <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }}></div>
-                      </div>
+                  <div className="apple-input-group mb-8">
+                     <label>Destination Folder</label>
+                    <input
+                      type="text"
+                      className="apple-input"
+                      value={destPath}
+                      onChange={(e) => setDestPath(e.target.value)}
+                    />
+                  </div>
+
+                  <button
+                    className="btn-apple-primary"
+                    style={{ width: '100%', justifyContent: 'center', padding: '12px' }}
+                    onClick={startTransfer}
+                    disabled={transferring || selectedFiles.size === 0}
+                  >
+                    {transferring ? 'Transferring...' : `Copy ${selectedFiles.size} items (${formatBytes(summary)})`}
+                  </button>
+
+                  {transferring && (
+                     <div className="apple-progress-container mt-8">
+                       <div className="flex-between caption text-sec">
+                         <span style={{ maxWidth: '60%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                           {currentFile || 'Initiating...'}
+                         </span>
+                         <span>{progress} / {totalFiles} completed</span>
+                       </div>
+                       <div className="apple-progress-bar">
+                         <div className="apple-progress-fill" style={{ width: `${(progress / totalFiles) * 100}%` }}></div>
+                       </div>
+                     </div>
+                  )}
+
+                  {transferComplete && (
+                    <div className="flex-between mt-8" style={{ color: '#10b981', justifyContent: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={24} />
+                      <span className="body-emphasis">Extraction Complete!</span>
                     </div>
                   )}
                 </div>
               )}
-
-              {filteredMedia.length > 0 && !scanning && (
-                <div style={{ padding: '0 8px 12px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={isCategoryAllSelected}
-                      onChange={toggleCategorySelection}
-                      style={{ width: '16px', height: '16px', accentColor: 'var(--accent-color)' }}
-                    />
-                    <span className="text-sm font-medium">Select All {category === 'all' ? 'Found' : category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')}</span>
-                  </label>
-                  <span className="text-xs text-sec">{selectedFiles.size} of {media.length} selected</span>
-                </div>
-              )}
-
-              {filteredMedia.length > 0 && !scanning && (
-                <div className="media-list">
-                  {filteredMedia.map((m, i) => (
-                    <div key={i} className="media-item" onClick={() => toggleSelection(m.path)} style={{ cursor: 'pointer', transition: 'background-color 0.2s', backgroundColor: selectedFiles.has(m.path) ? 'rgba(255,255,255,0.05)' : '' }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedFiles.has(m.path)}
-                        onChange={() => { }}
-                        style={{ marginRight: '16px', width: '16px', height: '16px', accentColor: 'var(--accent-color)', pointerEvents: 'none' }}
-                      />
-                      <div className="media-info" style={{ flex: 1 }}>
-                        <div className="media-icon">
-                          {getCategoryIcon(m.category)}
-                        </div>
-                        <div className="media-details">
-                          <h4>{m.title}</h4>
-                          <p>{m.artist} • {m.album}</p>
-                        </div>
-                      </div>
-                      <div className="text-xs text-sec">
-                        {formatBytes(m.size)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+
+            {/* Right Column: Media Viewer */}
+            <div className="apple-card" style={{ margin: 0, height: 'calc(100vh - 128px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+               <h2 className="tile-heading mb-8">Discovered Media</h2>
+               
+               <div className="apple-tabs" style={{ justifyContent: 'flex-start' }}>
+                 {['all', 'music', 'podcast', 'voice_recording', 'photo', 'video'].map(c => (
+                   <button
+                     key={c}
+                     className={`apple-tab ${category === c ? 'active' : ''}`}
+                     onClick={() => setCategory(c)}
+                     style={{ textTransform: 'capitalize' }}
+                   >
+                     {c.replace('_', ' ')}
+                   </button>
+                 ))}
+               </div>
+
+               <div style={{ flex: 1, overflowY: 'auto' }}>
+                 {media.length === 0 && !scanning && (
+                    <div className="flex-center text-sec" style={{ height: '100%', flexDirection: 'column', gap: '16px' }}>
+                      <FolderArchive size={48} opacity={0.3} />
+                      <p className="body-text">No media discovered yet. Scan a device to begin.</p>
+                    </div>
+                  )}
+                  
+                  {scanning && (
+                    <div className="flex-center text-sec" style={{ height: '100%', flexDirection: 'column', gap: '24px' }}>
+                      <Loader2 size={48} className="spinner" style={{ color: 'var(--apple-blue)' }} />
+                    </div>
+                  )}
+
+                  {filteredMedia.length > 0 && !scanning && (
+                    <>
+                      <div className="flex-between mb-4" style={{ padding: '0 8px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={isCategoryAllSelected}
+                            onChange={toggleCategorySelection}
+                            style={{ width: '18px', height: '18px', accentColor: 'var(--apple-blue)' }}
+                          />
+                          <span className="body-emphasis">Select All</span>
+                        </label>
+                        <span className="body-text text-sec">{selectedFiles.size} of {media.length} items</span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {filteredMedia.map((m, i) => (
+                           <div 
+                             key={i} 
+                             onClick={() => toggleSelection(m.path)} 
+                             style={{ 
+                               display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 16px',
+                               borderRadius: '8px', cursor: 'pointer', transition: 'background-color 0.2s',
+                               backgroundColor: selectedFiles.has(m.path) ? 'rgba(0, 113, 227, 0.05)' : 'transparent'
+                             }}
+                           >
+                             <input
+                               type="checkbox"
+                               checked={selectedFiles.has(m.path)}
+                               onChange={() => { }}
+                               style={{ width: '18px', height: '18px', accentColor: 'var(--apple-blue)', pointerEvents: 'none' }}
+                             />
+                             <div style={{ color: 'var(--text-tertiary-light)' }}>
+                               {getCategoryIcon(m.category)}
+                             </div>
+                             <div style={{ flex: 1, minWidth: 0 }}>
+                               <div className="body-emphasis" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                 {m.title}
+                               </div>
+                               <div className="caption text-sec" style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                 {m.artist} • {m.album}
+                               </div>
+                             </div>
+                             <div className="caption text-sec" style={{ whiteSpace: 'nowrap' }}>
+                                {formatBytes(m.size)}
+                             </div>
+                           </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+               </div>
+            </div>
+
           </div>
         </div>
       </main>
@@ -397,6 +410,12 @@ function App() {
         __html: `
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .spinner { animation: spin 1s linear infinite; }
+        
+        /* Modern scrollbar for media viewer */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a1a1a6; }
       `}} />
     </>
   );

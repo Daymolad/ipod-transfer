@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const startBackend = require('./backend/index');
+const packageJson = require('./package.json');
 
 let mainWindow;
 
@@ -11,7 +12,7 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1024,
     height: 800,
-    title: "iPod Transfer",
+    title: `iPod Transfer v${packageJson.version}`,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false

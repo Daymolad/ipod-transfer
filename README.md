@@ -3,12 +3,15 @@
 A sleek, offline-first native desktop application for extracting all of your music, podcasts, photos, and voice memos from an old or disconnected iPod—without needing iTunes syncing!
 
 <div align="center">
-  <img src="frontend/src/assets/hero.png" width="600" alt="iPod Transfer App Screenshot" />
+  <img src="./assets/dashboard.png" width="800" alt="iPod Transfer Dashboard Screenshot" />
+  <br/>
+  <img src="./assets/extraction.png" width="800" alt="iPod Transfer Extraction Screenshot" />
 </div>
 
 ## Features ✨
 
 *   **Autodetects your iPod:** Automatically scans your Volumes and deeply analyzes the hidden folders for media.
+*   **Media Support:** Fully extracts Music, Podcasts, Voice Memos, **Photos**, and **Videos** directly from the device's deepest data arrays!
 *   **Intelligent Discovery:** Sorts through raw bytes to bring back proper metadata including artists, track names, durations, and sizes.
 *   **Selective Extraction:** Don't want everything? No problem! Use checkboxes to selectively extract individual songs or select an entire category (like just your Podcasts).
 *   **Fully Native Desktop App:** Bundled with Electron for a buttery-smooth desktop experience.
@@ -58,7 +61,7 @@ Select it from the configuration menu on the left side of the app and click **Sc
 
 ### Step 2: Select Your Media
 Once scanned, your media will populate on the right panel.
-- **Filter by Category:** Click the tabs (Music, Podcast, Voice Recording) at the top to filter items.
+- **Filter by Category:** Click the tabs (Music, Podcast, Voice Recording, Photo, Video) at the top to filter items.
 - **Select Media:** Check the boxes next to individual items you want to keep, or click the **Select All** checkbox to grab the entire folder.
 
 ### Step 3: Extract!

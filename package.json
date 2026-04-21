@@ -1,6 +1,6 @@
 {
   "name": "ipod-transfer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": {
     "name": "Daymolad",
     "email": "damoncammish@gmail.com"
@@ -39,7 +39,9 @@
       "target": "nsis"
     },
     "linux": {
-      "target": ["deb"]
+      "target": [
+        "deb"
+      ]
     },
     "files": [
       "main.js",

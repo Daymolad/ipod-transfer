@@ -54,33 +54,41 @@ function App() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n\n');
+        buffer += decoder.decode(value, { stream: true });
+        
+        let splitIndex;
+        while ((splitIndex = buffer.indexOf('\n\n')) >= 0) {
+          const chunk = buffer.slice(0, splitIndex);
+          buffer = buffer.slice(splitIndex + 2);
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.replace('data: ', '');
+          if (chunk.startsWith('data: ')) {
+            const dataStr = chunk.substring(6);
             if (dataStr) {
-              const data = JSON.parse(dataStr);
-              if (data.type === 'progress') {
-                const elapsed = (Date.now() - start) / 1000;
-                let etaStr = 'Calculating...';
-                if (data.current > 5) {
-                    const rate = elapsed / data.current;
-                    const remaining = (data.total - data.current) * rate;
-                    etaStr = remaining > 60 ? `${Math.ceil(remaining / 60)} min` : `${Math.ceil(remaining)} sec`;
+              try {
+                const data = JSON.parse(dataStr);
+                if (data.type === 'progress') {
+                  const elapsed = (Date.now() - start) / 1000;
+                  let etaStr = 'Calculating...';
+                  if (data.current > 5) {
+                      const rate = elapsed / data.current;
+                      const remaining = (data.total - data.current) * rate;
+                      etaStr = remaining > 60 ? `${Math.ceil(remaining / 60)} min` : `${Math.ceil(remaining)} sec`;
+                  }
+                  setScanProgress({ current: data.current, total: data.total, file: data.file, etaStr });
+                } else if (data.type === 'complete') {
+                  setMedia(data.data);
+                  setSelectedFiles(new Set());
+                } else if (data.type === 'error') {
+                  console.error(data.error);
                 }
-                setScanProgress({ current: data.current, total: data.total, file: data.file, etaStr });
-              } else if (data.type === 'complete') {
-                setMedia(data.data);
-                setSelectedFiles(new Set());
-              } else if (data.type === 'error') {
-                console.error(data.error);
+              } catch (err) {
+                console.error("Error parsing JSON chunk:", err);
               }
             }
           }
@@ -111,28 +119,36 @@ function App() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n\n');
+        buffer += decoder.decode(value, { stream: true });
+        
+        let splitIndex;
+        while ((splitIndex = buffer.indexOf('\n\n')) >= 0) {
+          const chunk = buffer.slice(0, splitIndex);
+          buffer = buffer.slice(splitIndex + 2);
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.replace('data: ', '');
+          if (chunk.startsWith('data: ')) {
+            const dataStr = chunk.substring(6);
             if (dataStr) {
-              const data = JSON.parse(dataStr);
-              if (data.complete) {
-                setTransferComplete(true);
-                setTransferring(false);
-              } else if (data.error) {
-                console.error(data.error);
-                setTransferring(false);
-              } else {
-                setProgress(data.progress);
-                setCurrentFile(data.current);
+              try {
+                const data = JSON.parse(dataStr);
+                if (data.complete) {
+                  setTransferComplete(true);
+                  setTransferring(false);
+                } else if (data.error) {
+                  console.error(data.error);
+                  setTransferring(false);
+                } else {
+                  setProgress(data.progress);
+                  setCurrentFile(data.current);
+                }
+              } catch (err) {
+                console.error("Error parsing JSON chunk:", err);
               }
             }
           }
